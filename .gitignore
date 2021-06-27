@@ -136,3 +136,4 @@ dmypy.json
 /include
 .DS_Store
 pyvenv.cfg
+richcode/short/config.py

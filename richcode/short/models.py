@@ -14,12 +14,14 @@ class stock_basic(models.Model):
     """
 
     code = models.CharField(max_length=100, default="000000")
-    name = models.CharField(max_length=20, default="无名", blank=True)
-    industry = models.CharField(max_length=100, default="无行业", blank=True)
-    area = models.CharField(max_length=100, default="无地区", blank=True)
-    market = models.CharField(max_length=100, default="无市场类型", blank=True)
-    list_date = models.CharField(max_length=100, default="无上市日期", blank=True)
-    list_status = models.CharField(max_length=100, default="无上市状态", blank=True)
+    name = models.CharField(max_length=20, default="无名", blank=True, null=True)
+    industry = models.CharField(max_length=100, default="无行业", blank=True, null=True)
+    area = models.CharField(max_length=100, default="无地区", blank=True, null=True)
+    market = models.CharField(max_length=100, default="无市场类型", blank=True, null=True)
+    list_date = models.CharField(max_length=100, default="无上市日期", blank=True, null=True)
+    list_status = models.CharField(
+        max_length=100, default="无上市状态", blank=True, null=True
+    )
 
 
 class stock_daily(models.Model):

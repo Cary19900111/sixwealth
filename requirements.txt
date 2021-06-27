@@ -1,0 +1,4 @@
+Django==3.2.4
+tushare==1.2.64
+PyMySQL==1.0.2
+black==21.6b0

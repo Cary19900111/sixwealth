@@ -13,7 +13,8 @@ class stock_basic(models.Model):
     area,地区
     """
 
-    code = models.CharField(max_length=100, default="000000")
+    ts_code = models.CharField(max_length=10, default="000000")
+    code = models.CharField(max_length=10, default="000000")
     name = models.CharField(max_length=20, default="无名", blank=True, null=True)
     industry = models.CharField(max_length=100, default="无行业", blank=True, null=True)
     area = models.CharField(max_length=100, default="无地区", blank=True, null=True)
@@ -39,20 +40,20 @@ class stock_daily(models.Model):
     updatetime,更新时间
     """
 
+    ts_code = models.CharField(max_length=100, default="")
     date = models.CharField(max_length=20, default="")
-    code = models.CharField(max_length=100, default="")
-    name = models.CharField(max_length=20, default="")
     open = models.FloatField(default=None)
-    close = models.FloatField(default=None)
-    low = models.FloatField(default=None)
     high = models.FloatField(default=None)
-    volume = models.FloatField(default=None)
+    low = models.FloatField(default=None)
+    close = models.FloatField(default=None)
+    change = models.FloatField(default=None)
     changepercent = models.FloatField(default=None)
+    volume = models.FloatField(default=None)
+    amount = models.FloatField(default=None)
     updatetime = models.CharField(max_length=100, default="")
 
     class Meta:
-        unique_together = ["date", "code"]
-        index_together = ["date", "code"]
+        unique_together = ["date", "ts_code"]
         # ordering = ['-id']
 
 

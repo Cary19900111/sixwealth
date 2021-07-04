@@ -2,10 +2,32 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.http import HttpResponse
+from tushare import stock
 from short.models import stock_basic, stock_daily, stock_ban
 import tushare as ts
 from short.utils.get_datas import *
 import datetime
+
+
+def test(request):
+    pass
+
+
+def code_to_basic(code_list):
+    results = []
+    basics = stock_basic.objects.filter(ts_code__in=code_list).values()
+    for basic in basics:
+        basic_list = []
+        code = basic["code"]
+        name = basic["name"]
+        industry = basic["industry"]
+        area = basic["area"]
+        basic_list.append(code)
+        basic_list.append(name)
+        basic_list.append(industry)
+        basic_list.append(area)
+        results.append(basic_list)
+    return results
 
 
 def basicElementExist(stock_code):
@@ -14,10 +36,6 @@ def basicElementExist(stock_code):
         return True
     except Exception as err:
         return False
-
-
-def test(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
 
 
 def basic(request):
@@ -107,3 +125,67 @@ def daily(request):
                 print(str(err))
                 print(ts_code)
     return HttpResponse("{} daily information sync Done!".format(daytime))
+
+
+def volumn_donw(request):
+    """volumn_donw"""
+    stock_list = []
+    code_list = stock_basic.objects.values("ts_code").distinct()
+    # code_list = [{'code':'600716'}]
+    for code_dic in code_list:
+        try:
+            code1 = code_dic["ts_code"]
+            code1_daily_datas = (
+                stock_daily.objects.filter(ts_code=code1)
+                .order_by("id")
+                .reverse()[:2]
+                .values()
+            )
+            data_list = list(code1_daily_datas)
+            volume_today = data_list[0]["volume"]
+            volume_pre = data_list[1]["volume"]
+            open_today = data_list[0]["open"]
+            close_today = data_list[0]["close"]
+            # data_list[0]['date'] != date_today or
+            if (
+                volume_today == 0
+                or data_list[0]["changepercent"] > 8.0
+                or data_list[0]["changepercent"] < -8.0
+            ):
+                continue
+            if close_today <= open_today and volume_today <= 0.4 * volume_pre:
+                stock_list.append(code1)
+        except Exception as err:
+            print("error:" + str(err))
+            continue
+    print(stock_list)
+    return HttpResponse("bottom red 2 calculate done!")
+
+
+def deep_v(request):
+    """deep_v"""
+    stock_list = []
+    code_list = stock_basic.objects.values("ts_code").distinct()
+    # code_list = [{'code':'600716'}]
+    for code_dic in code_list:
+        try:
+            code1 = code_dic["ts_code"]
+            code1_daily_datas = (
+                stock_daily.objects.filter(ts_code=code1)
+                .order_by("id")
+                .reverse()[:1]
+                .values()
+            )
+            data_list = list(code1_daily_datas)
+            open = data_list[0]["open"]
+            low = data_list[0]["low"]
+            close = data_list[0]["close"]
+            # data_list[0]['date'] != date_today or
+            if (open - low) / low > 0.05 and (close - low) / low > 0.05:
+                stock_list.append(code1)
+        except Exception as err:
+            print("error:" + str(err))
+            continue
+    basic_info = code_to_basic(stock_list)
+    print(basic_info)
+    return HttpResponse("deep_v done!")

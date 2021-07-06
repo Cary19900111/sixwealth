@@ -187,5 +187,8 @@ def deep_v(request):
             print("error:" + str(err))
             continue
     basic_info = code_to_basic(stock_list)
-    print(basic_info)
+    result = ""
+    for info in basic_info:
+        result = result + str(info) + "\n"
+    print(result)
     return HttpResponse("deep_v done!")

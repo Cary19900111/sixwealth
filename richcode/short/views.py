@@ -162,8 +162,8 @@ def volumn_donw(request):
     return HttpResponse("bottom red 2 calculate done!")
 
 
-def deep_v(request):
-    """deep_v"""
+def deepv_add_two_high(request):
+    """深V,持续2天创新高"""
     stock_list = []
     code_list = stock_basic.objects.values("ts_code").distinct()
     # code_list = [{'code':'600716'}]
@@ -173,15 +173,23 @@ def deep_v(request):
             code1_daily_datas = (
                 stock_daily.objects.filter(ts_code=code1)
                 .order_by("id")
-                .reverse()[:1]
+                .reverse()[0:3]
                 .values()
             )
             data_list = list(code1_daily_datas)
-            open = data_list[0]["open"]
-            low = data_list[0]["low"]
-            close = data_list[0]["close"]
+            one_open = data_list[2]["open"]
+            one_low = data_list[2]["low"]
+            one_close = data_list[2]["close"]
+            one_high = data_list[2]["high"]
+            two_high = data_list[1]["high"]
+            three_high = data_list[0]["high"]
             # data_list[0]['date'] != date_today or
-            if (open - low) / low > 0.05 and (close - low) / low > 0.05:
+            if (
+                (one_open - one_low) / one_low > 0.05
+                and (one_close - one_low) / one_low > 0.05
+                and two_high > one_high
+                and three_high > two_high
+            ):
                 stock_list.append(code1)
         except Exception as err:
             print("error:" + str(err))

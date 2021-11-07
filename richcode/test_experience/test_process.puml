@@ -1,0 +1,31 @@
+@startuml
+skinparam ConditionEndStyle hline
+start
+:故事开启;
+:参与需求评审;
+:编写测试用例;
+:参与技术评审;
+:参与设计评审;
+:完善测试用例;
+:用例评审｜冒烟用例｜回归用例|测试计划;
+:相同模块的遗留问题转入新的故事;
+:根据接口定义编写后端脚本用例;
+:进行两轮特性分支用例执行(发送每日进度);
+if(release与master版本是否一致) then (是)
+    :通知开发合并特性分支代码到release;
+else(否)
+    :确认master和release差异，release先合并master再合特性分支;
+endif
+:冒烟用例完成通知产品验收;
+if(产品是否验收通过) then(否)
+    :记录缺陷并验证;
+else(是)  
+endif
+:回归测试通过，通知开发以--ff模式maste合并release;
+:预发布环境模拟上线流程及验证;
+:邮件发送测试报告;
+:线上验证;
+:故事关闭;
+:迭代总结;
+stop
+@enduml

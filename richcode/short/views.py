@@ -13,6 +13,10 @@ def test(request):
     pass
 
 
+def index(request):
+    return render(request, "index.html")
+
+
 def code_to_basic(code_list):
     results = []
     basics = stock_basic.objects.filter(ts_code__in=code_list).values()
@@ -40,6 +44,7 @@ def basicElementExist(stock_code):
 
 def basic(request):
     """L上市 D退市 P暂停上市"""
+    print("enter basic")
     df = get_basic_data()
     code_list = df.index.tolist()
     for index in code_list:
@@ -79,7 +84,8 @@ def basic(request):
 
 def daily(request):
     """获取share的日数据"""
-    daytime = request.GET["daytime"]
+    print("enter daily")
+    daytime = request.POST.get("daily")
     updatetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     ts_code_list = []
     ts_code_partion = []

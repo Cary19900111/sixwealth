@@ -3,7 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 from django.http import HttpResponse
 from tushare import stock
-from short.models import stock_basic, stock_daily, stock_ban
+from short.models import stock_basic, stock_daily, stock_ban, stock_month
 import tushare as ts
 from short.utils.get_datas import *
 import datetime
@@ -208,5 +208,45 @@ def deepv_add_two_high(request):
 
 
 def month(request):
-    data = get_month_data()
-    print(data)
+    updatetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    years = ["2021"]
+    month_list = [
+        "0131",
+        "0229",
+        "0331",
+        "0430",
+        "0531",
+        "0630",
+        "0731",
+        "0831",
+        "0930",
+        "1031",
+        "1130",
+    ]
+    for year in years:
+        for month in month_list:
+            yymm = year + month
+            df = get_month_data(yymm)
+            code_list = df.index.tolist()
+            for index in code_list:
+                ts_code = df.loc[index, "ts_code"]
+                trade_date = df.loc[index, "trade_date"]
+                open = df.loc[index, "open"]
+                close = df.loc[index, "close"]
+                low = df.loc[index, "low"]
+                high = df.loc[index, "high"]
+                q = stock_month(
+                    ts_code=ts_code,
+                    trade_date=trade_date,
+                    open=open,
+                    close=close,
+                    low=low,
+                    high=high,
+                    updatetime=updatetime,
+                )
+                try:
+                    q.save()
+                except Exception as err:
+                    print(str(err))
+                    print(ts_code)
+    return HttpResponse("month information sync Done!")

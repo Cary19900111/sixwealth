@@ -72,3 +72,17 @@ class stock_ban(models.Model):
     month = models.CharField(max_length=20, default="")
     count = models.FloatField(default=None)
     ratio = models.FloatField(default=None)
+
+
+class stock_month(models.Model):
+    ts_code = models.CharField(max_length=100, default="")
+    trade_date = models.CharField(max_length=20, default="")
+    open = models.FloatField(default=None)
+    high = models.FloatField(default=None)
+    low = models.FloatField(default=None)
+    close = models.FloatField(default=None)
+    updatetime = models.CharField(max_length=100, default="")
+
+    class Meta:
+        unique_together = ["ts_code", "trade_date"]
+        # ordering = ['-id']

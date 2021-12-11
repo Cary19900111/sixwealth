@@ -20,11 +20,11 @@ def daily_data(code_list, daytime):
     return data
 
 
-def month_data():
+def month_data(yymm):
     ts.set_token(tushare_token)
     pro = ts.pro_api(tushare_token)
     df = pro.monthly(
-        trade_date="20211130",
-        fields="ts_code,trade_date,open,high,low,close,vol,amount",
+        trade_date=yymm,
+        fields="ts_code,trade_date,open,high,low,close",
     )
     return df

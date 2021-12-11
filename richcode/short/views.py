@@ -250,3 +250,38 @@ def month(request):
                     print(str(err))
                     print(ts_code)
     return HttpResponse("month information sync Done!")
+
+
+def high_price_down_50(request):
+    print("enter high_price_down_50")
+    stock_list = []
+    code_list = stock_basic.objects.values("ts_code").distinct()
+    for code_dic in code_list:
+        try:
+            code1 = code_dic["ts_code"]
+            code1_daily_datas = (
+                stock_daily.objects.filter(ts_code=code1)
+                .order_by("id")
+                .reverse()[0:1]
+                .values()
+            )
+            data_list = list(code1_daily_datas)
+            if len(data_list) < 1:
+                continue
+            close_today = data_list[0]["close"]
+            code1_month_datas = stock_month.objects.filter(ts_code=code1).values()
+            code1_data_list = list(code1_month_datas)
+            if len(code1_data_list) < 1:
+                continue
+            code1_high_price = 0.0
+            for month_data in code1_data_list:
+                code1_high_price = max(code1_high_price, month_data["high"])
+            if close_today <= 0.4 * code1_high_price:
+                stock_list.append(code1)
+            else:
+                continue
+        except Exception as err:
+            print("error:" + str(err))
+            continue
+    print(stock_list)
+    return HttpResponse("bottom less vol done!")

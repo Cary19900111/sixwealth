@@ -137,7 +137,6 @@ def volumn_donw(request):
     """volumn_donw"""
     stock_list = []
     code_list = stock_basic.objects.values("ts_code").distinct()
-    # code_list = [{'code':'600716'}]
     for code_dic in code_list:
         try:
             code1 = code_dic["ts_code"]
@@ -165,7 +164,7 @@ def volumn_donw(request):
             print("error:" + str(err))
             continue
     print(stock_list)
-    return HttpResponse("bottom red 2 calculate done!")
+    return HttpResponse("bottom less vol done!")
 
 
 def deepv_add_two_high(request):
@@ -206,3 +205,8 @@ def deepv_add_two_high(request):
         result = result + str(info) + "\n"
     print(result)
     return HttpResponse("deep_v done!")
+
+
+def month(request):
+    data = get_month_data()
+    print(data)

@@ -283,5 +283,26 @@ def high_price_down_50(request):
         except Exception as err:
             print("error:" + str(err))
             continue
-    print(stock_list)
+    result = ""
+    for stock in stock_list:
+        try:
+            if stock.startswith("688") or stock.startswith("600634"):
+                continue
+            basic_set = stock_basic.objects.filter(ts_code=stock).values(
+                "code", "name", "industry", "area"
+            )
+            basic_dict = list(basic_set)[0]
+            basic_list = [
+                basic_dict["code"],
+                basic_dict["name"],
+                basic_dict["industry"],
+                basic_dict["area"],
+            ]
+            result = result + ",".join(basic_list) + "\n"
+        except Exception as err:
+            print(stock)
+            print(basic_dict)
+            print(str(err))
+    with open("111.csv", "a", encoding="gb2312") as f:
+        f.write(result)
     return HttpResponse("bottom less vol done!")

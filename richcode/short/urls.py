@@ -10,4 +10,5 @@ urlpatterns = [
     path("deepv", views.deepv_add_two_high, name="deep_v"),
     path("bottomlessvol", views.volumn_donw, name="volumn_donw"),
     path("pricedown50", views.high_price_down_50, name="high_price_down_50"),
+    path("fillmonthdata", view=views.fill_omit_month_data, name="fill_omit_month_data"),
 ]

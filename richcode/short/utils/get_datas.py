@@ -5,8 +5,8 @@ def get_basic_data():
     return basic_data()
 
 
-def get_daily_data(code_list, daytime):
-    return daily_data(code_list, daytime)
+def get_daily_data(code_list, begintime, endtime):
+    return daily_data(code_list, begintime, endtime)
 
 
 def get_month_data(yymm):

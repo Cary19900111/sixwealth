@@ -13,10 +13,10 @@ def basic_data():
     return data
 
 
-def daily_data(code_list, daytime):
+def daily_data(code_list, begintime, endtime):
     ts.set_token(tushare_token)
     pro = ts.pro_api(tushare_token)
-    data = pro.daily(ts_code=code_list, start_date=daytime, end_date=daytime)
+    data = pro.daily(ts_code=code_list, start_date=begintime, end_date=endtime)
     return data
 
 

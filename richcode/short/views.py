@@ -3,6 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 from django.http import HttpResponse
 from tushare import stock
+from tushare.pro import data_pro
 from short.models import stock_basic, stock_daily, stock_ban, stock_month
 import tushare as ts
 from short.utils.get_datas import *
@@ -100,7 +101,7 @@ def daily(request):
             ts_code_partion = []
     ts_code_partion.append(ts_code_partion)
     for ts_code_partition in ts_code_list:
-        df = get_daily_data(",".join(ts_code_partition), daytime)
+        df = get_daily_data(",".join(ts_code_partition), daytime, daytime)
         code_list = df.index.tolist()
         for index in code_list:
             ts_code = df.loc[index, "ts_code"]
@@ -207,6 +208,22 @@ def deepv_add_two_high(request):
     return HttpResponse("deep_v done!")
 
 
+def get_month_b_e_day(yyyymm):
+    """
+    yymm:202009
+    return:[20200901,20200930]
+    """
+    month_b = yyyymm + "01"
+    next_month = int(yyyymm) + 1
+    if next_month % 100 == 13:
+        next_month = next_month - 12 + 100
+    month_e = (
+        datetime.datetime(int(str(next_month)[0:4]), int(str(next_month)[4:6]), 1)
+        - datetime.timedelta(days=1)
+    ).strftime("%Y%m%d")
+    return [month_b, month_e]
+
+
 def month(request):
     updatetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     years = ["2021"]
@@ -306,3 +323,48 @@ def high_price_down_50(request):
     with open("111.csv", "a", encoding="gb2312") as f:
         f.write(result)
     return HttpResponse("bottom less vol done!")
+
+
+def fill_omit_month_data(request):
+    updatetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    yyyymm = request.POST.get("yyyymm")
+    resutl = get_month_b_e_day(yyyymm)
+    ts_codes = stock_basic.objects.values_list("ts_code")
+    for ts_code in ts_codes:
+        df = get_daily_data(ts_code[0], resutl[0], resutl[1])
+        day_index = df.index.tolist()
+        max = len(day_index)
+        if max == 0:
+            continue
+        result_open = 0
+        result_close = 0
+        resutl_low = 10000
+        result_high = 0
+        count = 0
+        for index in day_index:
+            count = count + 1
+            if count == 1:
+                result_close = df.loc[index, "close"]
+            if count == max:
+                result_open = df.loc[index, "open"]
+            low = df.loc[index, "low"]
+            if low < resutl_low:
+                resutl_low = low
+            high = df.loc[index, "high"]
+            if high > result_high:
+                result_high = high
+        q = stock_month(
+            ts_code=ts_code[0],
+            trade_date=resutl[1],
+            open=result_open,
+            close=result_close,
+            low=resutl_low,
+            high=result_high,
+            updatetime=updatetime,
+        )
+        try:
+            q.save()
+        except Exception as err:
+            print(str(err))
+            print(ts_code)
+    return HttpResponse("sync complete")

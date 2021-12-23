@@ -368,3 +368,85 @@ def fill_omit_month_data(request):
             print(str(err))
             print(ts_code)
     return HttpResponse("sync complete")
+
+
+def price_down_and_horiz(request):
+    print("enter price down and horiz")
+    begin_date = request.POST.get("beginyyyymm")
+    end_date = request.POST.get("endyyyymm")
+    down = int(request.POST.get("down"))
+    horizon = int(request.POST.get("horizon"))
+    stock_list = []
+    stock_horizon = []
+    code_list = stock_basic.objects.values("ts_code").distinct()
+    for code_dic in code_list:
+        try:
+            # 获取最近一次收盘价
+            code1 = code_dic["ts_code"]
+            code1_daily_datas = (
+                stock_daily.objects.filter(ts_code=code1)
+                .order_by("id")
+                .reverse()[0:1]
+                .values()
+            )
+            data_list = list(code1_daily_datas)
+            if len(data_list) < 1:
+                continue
+            close_today = data_list[0]["close"]
+            # 获取月份的最高价
+            code1_month_datas = stock_month.objects.filter(
+                ts_code=code1, trade_date__gte=begin_date, trade_date__lt=end_date
+            ).values()
+            code1_data_list = list(code1_month_datas)
+            if len(code1_data_list) < 1:
+                continue
+            code1_high_price = 0.0
+            for month_data in code1_data_list:
+                code1_high_price = max(code1_high_price, month_data["high"])
+            if close_today <= down * 0.01 * code1_high_price:
+                stock_list.append(code1)
+            # 找横盘的
+            horizon_month_datas = stock_month.objects.filter(
+                ts_code=code1, trade_date__gte=end_date
+            ).values()
+            horizon_month_datas_list = list(horizon_month_datas)
+            if len(horizon_month_datas_list) < 1:
+                continue
+            high_price = 0.0
+            low_price = 100000.0
+            for month_data in horizon_month_datas_list:
+                high_price = max(high_price, month_data["high"])
+                low_price = min(low_price, month_data["low"])
+            if (
+                close_today < high_price
+                and close_today > low_price
+                and low_price > (100 - horizon) * 0.01 * high_price
+            ):
+                stock_horizon.append(code1)
+        except Exception as err:
+            print("error:" + str(err))
+            continue
+    result = ""
+    stock_res = list(set(stock_list) & set(stock_horizon))
+    for stock in stock_res:
+        try:
+            if stock.startswith("688") or stock.startswith("600634"):
+                continue
+            basic_set = stock_basic.objects.filter(ts_code=stock).values(
+                "code", "name", "industry", "area"
+            )
+            basic_dict = list(basic_set)[0]
+            basic_list = [
+                basic_dict["code"],
+                basic_dict["name"],
+                basic_dict["industry"],
+                basic_dict["area"],
+            ]
+            result = result + ",".join(basic_list) + "\n"
+        except Exception as err:
+            print(stock)
+            print(basic_dict)
+            print(str(err))
+    with open("222.csv", "a", encoding="gb2312") as f:
+        f.write(result)
+    return HttpResponse("bottom less vol done!")

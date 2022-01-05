@@ -408,7 +408,7 @@ def price_down_and_horiz(request):
             code1_high_price = 0.0
             for month_data in code1_data_list:
                 code1_high_price = max(code1_high_price, month_data["high"])
-            if close_today <= down * 0.01 * code1_high_price:
+            if close_today <= (100 - down) * 0.01 * code1_high_price:
                 stock_list.append(code1)
             # 找横盘的
             horizon_month_datas = stock_month.objects.filter(

@@ -371,6 +371,11 @@ def fill_omit_month_data(request):
 
 
 def price_down_and_horiz(request):
+    """
+    scenery1
+    input：202003 202109 60 20
+    explain:[202003,202109) current_price<%60  [202109~now)20
+    """
     print("enter price down and horiz")
     begin_date = request.POST.get("beginyyyymm")
     end_date = request.POST.get("endyyyymm")

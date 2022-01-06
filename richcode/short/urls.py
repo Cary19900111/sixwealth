@@ -16,4 +16,9 @@ urlpatterns = [
         view=views.price_down_and_horiz,
         name="fill_omit_month_data",
     ),
+    path(
+        "horiz",
+        view=views.horiz,
+        name="horiz",
+    ),
 ]

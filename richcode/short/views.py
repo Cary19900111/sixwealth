@@ -455,3 +455,63 @@ def price_down_and_horiz(request):
     with open("222.csv", "a", encoding="gb2312") as f:
         f.write(result)
     return HttpResponse("bottom less vol done!")
+
+
+def horiz(request):
+    """
+    scenery1
+    input：202003 202109 60 20
+    explain:[202003,202109) current_price<%60  [202109~now)20
+    """
+    print("enter price down and horiz")
+    begin_date = request.POST.get("beginyyyymm")
+    end_date = request.POST.get("endyyyymm")
+    horizon = int(request.POST.get("horizon"))
+    begin_date = begin_date + "01"
+    end_date = end_date + "01"
+    stock_horizon = []
+    code_list = stock_basic.objects.values("ts_code").distinct()
+    for code_dic in code_list:
+        try:
+            code1 = code_dic["ts_code"]
+            # 找横盘的
+            horizon_month_datas = stock_month.objects.filter(
+                ts_code=code1, trade_date__gte=begin_date, trade_date__lt=end_date
+            ).values()
+            horizon_month_datas_list = list(horizon_month_datas)
+            if len(horizon_month_datas_list) < 1:
+                continue
+            high_price = 0.0
+            low_price = 100000.0
+            for month_data in horizon_month_datas_list:
+                high_price = max(high_price, month_data["high"])
+                low_price = min(low_price, month_data["low"])
+            if (high_price - low_price) < low_price * horizon * 0.01:
+                stock_horizon.append(code1)
+        except Exception as err:
+            print("error:" + str(err))
+            continue
+    result = ""
+    stock_res = stock_horizon
+    for stock in stock_res:
+        try:
+            if stock.startswith("688") or stock.startswith("600634"):
+                continue
+            basic_set = stock_basic.objects.filter(ts_code=stock).values(
+                "code", "name", "industry", "area"
+            )
+            basic_dict = list(basic_set)[0]
+            basic_list = [
+                basic_dict["code"],
+                basic_dict["name"],
+                basic_dict["industry"],
+                basic_dict["area"],
+            ]
+            result = result + ",".join(basic_list) + "\n"
+        except Exception as err:
+            print(stock)
+            print(basic_dict)
+            print(str(err))
+    with open("222_horizon.csv", "a", encoding="gb2312") as f:
+        f.write(result)
+    return HttpResponse("bottom less vol done!")

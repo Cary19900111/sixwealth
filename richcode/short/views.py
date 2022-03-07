@@ -404,6 +404,7 @@ def price_down_and_horiz(request):
             ).values()
             code1_data_list = list(code1_month_datas)
             if len(code1_data_list) < 1:
+                stock_horizon.append(code1)
                 continue
             code1_high_price = 0.0
             for month_data in code1_data_list:
